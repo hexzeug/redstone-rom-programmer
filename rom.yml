@@ -1,1 +1,14 @@
-word: 32
+bank:
+  dir: west
+  shift: 0
+  bitmask: 0xF
+  period: 7
+  shift_bit: 0
+word:
+  dir: north
+  shift: 5
+  bitmask: 0x1F
+  period: 2
+  side_bit: 4
+  bytes: 4
+zero: "purple_wool"
