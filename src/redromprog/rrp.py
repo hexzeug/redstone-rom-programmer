@@ -132,6 +132,12 @@ def main() -> int:
     layout = RomLayout(parse_layout(args.layout))
     programmer = RomProgrammer(layout)
     hex_data = read_hex_file(args.input)
+    min_address = layout.base_address * layout.word_bytes
+    max_address = (layout.base_address + layout.size) * layout.word_bytes
+    for (start, end) in hex_data.segments():
+        if start < min_address or end > max_address:
+            print(f"Error: Hex file contains data outside of the ROM bounds ({min_address} to {max_address - 1})", file=sys.stderr)
+            raise SystemExit(1)
     for address in range(layout.base_address, layout.base_address + layout.size):
         value = 0
         for i in range(layout.word_bytes):
