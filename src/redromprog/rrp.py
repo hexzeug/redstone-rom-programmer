@@ -1,5 +1,4 @@
 import argparse
-from fileinput import filename
 import sys
 from pathlib import PurePath
 from types import SimpleNamespace
@@ -92,7 +91,7 @@ class RomLayout:
         word = (offset >> self.word_shift) & self.word_bitmask
         bank_coord = bank * self.bank_period + side * 2
         word_coord = word * self.word_period - shift
-        dir = self._dir(-2 * side + 1, self.bank_dir)
+        dir = self._dir(2 * side - 1, self.bank_dir)
         coords1 = self._dir(bank_coord, self.bank_dir)
         coords2 = self._dir(word_coord, self.word_dir)
         return (self._add(coords1, coords2), self.OFFSETS[dir])
