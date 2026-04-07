@@ -1,0 +1,7 @@
+[project]
+name = "redstone-rom-programmer"
+version = "0.1.0"
+description = "Redstone Rom Programmer"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
