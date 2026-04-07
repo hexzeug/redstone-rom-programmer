@@ -5,6 +5,7 @@ from pathlib import PurePath
 from types import SimpleNamespace
 from yaml import load, Loader
 from mcschematic import MCSchematic, Version
+from intelhex import IntelHex
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Redstone ROM Programmer: Convert .hex to .schem")
@@ -32,6 +33,16 @@ def parse_layout(rom_layout_file):
             print(f"Error: Failed to parse {rom_layout_file}, {e}", file=sys.stderr)
             raise SystemExit(1)
     return layout
+
+def read_hex_file(hex_file):
+    try:
+        ih = IntelHex()
+        ih.padding = 0x00
+        ih.loadhex(hex_file)
+        return ih
+    except Exception as e:
+        print(f"Error: Failed to read {hex_file} as a hex file, {e}", file=sys.stderr)
+        raise SystemExit(1)
 
 class RomLayout:
     DIRECTIONS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
@@ -94,7 +105,6 @@ class RomProgrammer:
     def _write_bit(self, coords, height, dir, bit):
         block = self.layout.zero if bit == 0 else f"minecraft:repeater[facing={dir}]"
         self.schem.setBlock((coords[0], height, coords[1]), block)
-        print(f"Writing bit {bit} at ({coords[0]}, {height}, {coords[1]}) facing {dir}")
     
     def _write_byte(self, coords, height, dir, byte):
         for i in range(8):
@@ -121,6 +131,12 @@ def main() -> int:
     args = parse_args()
     layout = RomLayout(parse_layout(args.layout))
     programmer = RomProgrammer(layout)
-    programmer.write(0, 0x12345678)
+    hex_data = read_hex_file(args.input)
+    for address in range(layout.base_address, layout.base_address + layout.size):
+        value = 0
+        for i in range(layout.word_bytes):
+            hex_address = address * layout.word_bytes + i
+            value |= (hex_data[hex_address]) << (8 * i)
+        programmer.write(address, value)
     programmer.save(args.output)
     return 0
